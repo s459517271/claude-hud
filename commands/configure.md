@@ -66,6 +66,7 @@ Questions: **Turn Off → Turn On → Git Style → Layout/Reset → Custom Line
   - "Usage limits" - 5h: 25% | 7d: 10%
   - "Session duration" - ⏱️ 5m
   - "Session name" - fix-auth-bug (session slug or custom title)
+  - "Session tokens" - Tokens 12.8M (in: 7k, out: 28k, cache: 12.8M)
 
 ### Q4: Turn On (based on chosen preset)
 - header: "Turn On"
@@ -102,6 +103,7 @@ If user chooses "Enter custom text", use AskUserQuestion to get their text. Save
   - "Project name" - my-project path display
   - "Git status" - git:(main*) branch indicator
   - "Session name" - fix-auth-bug (session slug or custom title)
+  - "Session tokens" - Tokens 12.8M (in: 7k, out: 28k, cache: 12.8M)
   - "Usage bar style" - ██░░ 25% visual bar (only if usageBarEnabled is true)
 
 If more than 4 items ON, show Activity items (Tools, Agents, Todos, Project, Git) first.
@@ -118,6 +120,7 @@ Info items (Counts, Tokens, Usage, Speed, Duration) can be turned off via "Reset
   - "Usage limits" - 5h: 25% | 7d: 10%
   - "Usage bar style" - ██░░ 25% visual bar (only if usageBarEnabled is false)
   - "Session name" - fix-auth-bug (session slug or custom title)
+  - "Session tokens" - Tokens 12.8M (in: 7k, out: 28k, cache: 12.8M)
   - "Session duration" - ⏱️ 5m
 
 ### Q3: Git Style (only if Git is currently enabled)
@@ -161,17 +164,17 @@ If user chooses "Remove", set `display.customLine` to `""` in config.
 
 **Full** (everything ON):
 - Activity: Tools ON, Agents ON, Todos ON
-- Info: Counts ON, Tokens ON, Usage ON, Duration ON, Session Name ON
+- Info: Counts ON, Tokens ON, Usage ON, Duration ON, Session Name ON, Session Tokens ON
 - Git: ON (with dirty indicator, no ahead/behind)
 
 **Essential** (activity + git):
 - Activity: Tools ON, Agents ON, Todos ON
-- Info: Counts OFF, Tokens OFF, Usage OFF, Duration ON, Session Name OFF
+- Info: Counts OFF, Tokens OFF, Usage OFF, Duration ON, Session Name OFF, Session Tokens OFF
 - Git: ON (with dirty indicator)
 
 **Minimal** (core only — this is the default):
 - Activity: Tools OFF, Agents OFF, Todos OFF
-- Info: Counts OFF, Tokens OFF, Usage OFF, Duration OFF, Session Name OFF
+- Info: Counts OFF, Tokens OFF, Usage OFF, Duration OFF, Session Name OFF, Session Tokens OFF
 - Git: ON (with dirty indicator)
 
 ---
@@ -213,6 +216,7 @@ If user chooses "Remove", set `display.customLine` to `""` in config.
 | Usage bar style | `display.usageBarEnabled` |
 | Session name | `display.showSessionName` |
 | Session duration | `display.showDuration` |
+| Session tokens | `display.showSessionTokens` |
 | Custom line | `display.customLine` |
 
 **Always true (not configurable):**

@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import * as readline from 'readline';
 import { createHash } from 'node:crypto';
 import { getHudPluginDir } from './claude-config-dir.js';
-import type { TranscriptData, ToolEntry, AgentEntry, TodoItem } from './types.js';
+import type { TranscriptData, ToolEntry, AgentEntry, TodoItem, SessionTokenUsage } from './types.js';
 
 interface TranscriptLine {
   timestamp?: string;
@@ -13,6 +13,12 @@ interface TranscriptLine {
   customTitle?: string;
   message?: {
     content?: ContentBlock[];
+    usage?: {
+      input_tokens?: number;
+      output_tokens?: number;
+      cache_creation_input_tokens?: number;
+      cache_read_input_tokens?: number;
+    };
   };
 }
 
@@ -46,6 +52,7 @@ interface SerializedTranscriptData {
   todos: TodoItem[];
   sessionStart?: string;
   sessionName?: string;
+  sessionTokens?: SessionTokenUsage;
 }
 
 interface TranscriptCacheFile {
@@ -91,6 +98,7 @@ function serializeTranscriptData(data: TranscriptData): SerializedTranscriptData
     todos: data.todos.map((todo) => ({ ...todo })),
     sessionStart: data.sessionStart?.toISOString(),
     sessionName: data.sessionName,
+    sessionTokens: data.sessionTokens,
   };
 }
 
@@ -109,6 +117,7 @@ function deserializeTranscriptData(data: SerializedTranscriptData): TranscriptDa
     todos: data.todos.map((todo) => ({ ...todo })),
     sessionStart: data.sessionStart ? new Date(data.sessionStart) : undefined,
     sessionName: data.sessionName,
+    sessionTokens: data.sessionTokens,
   };
 }
 
@@ -173,6 +182,12 @@ export async function parseTranscript(transcriptPath: string): Promise<Transcrip
   const taskIdToIndex = new Map<string, number>();
   let latestSlug: string | undefined;
   let customTitle: string | undefined;
+  const sessionTokens: SessionTokenUsage = {
+    inputTokens: 0,
+    outputTokens: 0,
+    cacheCreationTokens: 0,
+    cacheReadTokens: 0,
+  };
 
   let parsedCleanly = false;
 
@@ -193,6 +208,14 @@ export async function parseTranscript(transcriptPath: string): Promise<Transcrip
         } else if (typeof entry.slug === 'string') {
           latestSlug = entry.slug;
         }
+        // Accumulate token usage from assistant messages
+        if (entry.type === 'assistant' && entry.message?.usage) {
+          const usage = entry.message.usage;
+          sessionTokens.inputTokens += usage.input_tokens ?? 0;
+          sessionTokens.outputTokens += usage.output_tokens ?? 0;
+          sessionTokens.cacheCreationTokens += usage.cache_creation_input_tokens ?? 0;
+          sessionTokens.cacheReadTokens += usage.cache_read_input_tokens ?? 0;
+        }
         processEntry(entry, toolMap, agentMap, taskIdToIndex, latestTodos, result);
       } catch {
         // Skip malformed lines
@@ -208,6 +231,7 @@ export async function parseTranscript(transcriptPath: string): Promise<Transcrip
   result.agents = Array.from(agentMap.values()).slice(-10);
   result.todos = latestTodos;
   result.sessionName = customTitle ?? latestSlug;
+  result.sessionTokens = sessionTokens;
   if (parsedCleanly) {
     writeTranscriptCache(transcriptPath, transcriptState, result);
   }
